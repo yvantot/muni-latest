@@ -1,0 +1,157 @@
+/* ONLY WHITE THEME BECAUSE IT NEEDS TO BE NOTICEABLE */
+/* 	When doing CSS in content script, always emember:
+	- Start with a clean state with: "all: initial", attached in your :host or &, but it's not 100% solution, it still inherit some shit for unknown reasons on some sites
+	- Avoid using rem, or measurements that depends on root elements, instead use em
+	- Beware of CSS inheritance, your font should always be in unique name.
+	- Don't take unnecessary width that may disrupt user's experience
+	- Use custom elements. It's the only solution for CSS inheritance.
+*/
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+* {
+	user-select: none;
+	outline: none;
+	border: none;
+	background: none;
+	line-height: 1.7;
+	color: hsl(0, 0%, 90%);
+	font-family: "POPAPP-FONT", Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	transform: none;
+	font-weight: normal;
+	font-style: normal;
+}
+
+:host {
+	--drkrgray: hsl(0, 0%, 5%);
+	--drkgray: hsl(0, 0%, 5%);
+	--dgray: hsl(0, 0%, 10%);
+	--lgtgray: hsl(0, 0%, 15%);
+	--lgtrgray: hsl(0, 0%, 20%);
+
+	--ogray: hsla(0, 0%, 50%, 0.5);
+
+	--drkrwhite: hsl(0, 0%, 70%);
+	--drkwhite: hsl(0, 0%, 90%);
+	--white: hsl(0, 0%, 95%);
+	--lgtwhite: hsl(0, 0%, 100%);
+
+	--linesize: 1px;
+
+	--green: hsl(115, 50%, 50%);
+	--red: hsl(0, 50%, 50%);
+}
+
+#popapp-main {
+	all: initial;
+}
+
+.container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999999;
+	backdrop-filter: blur(5px) brightness(50%);
+
+	overflow: hidden;
+	button,
+	svg {
+		cursor: pointer;
+	}
+
+	svg {
+		aspect-ratio: 1/1;
+		max-width: 30px;
+	}
+
+	.scard {
+		min-width: 35vw;
+		min-height: 50vh;
+		width: fit-content;
+		max-width: 50vw;
+		max-height: 90vh;
+		box-shadow: 0px 10px 20px hsla(0, 0%, 0%, 0.5);
+		cursor: pointer;
+		background-color: var(--lgtgray);
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+		justify-content: space-between;
+
+		padding: 2em;
+		min-height: 40vh;
+		border-radius: 2em;
+		border: 2px solid var(--ogray);
+
+		.cimage {
+			display: flex;
+			justify-content: center;
+			img {
+				border-radius: 1rem;
+				width: fit-content;
+				object-fit: contain;
+				height: 50vh;
+			}
+		}
+
+		.level {
+			font-size: 0.9em;
+			text-align: left;
+		}
+
+		.question,
+		.answer {
+			font-weight: bold;
+			font-size: 1.5em;
+			text-align: center;
+		}
+		.answer {
+			color: var(--green);
+		}
+
+		.answer-container {
+			input {
+				width: 100%;
+				border-radius: 0.5em;
+				padding: 0.5em;
+				border: 1px solid var(--ogray);
+			}
+
+			.choices {
+				display: flex;
+				justify-content: space-between;
+				gap: 0.5em;
+
+				.uchoice:hover {
+					background-color: var(--lgtrgray);
+				}
+				.uchoice {
+					flex-grow: 1;
+					cursor: pointer;
+					border-radius: 0.5em;
+					padding: 0.25em;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					border: 1px solid var(--ogray);
+				}
+			}
+		}
+	}
+}
+
+.no-display {
+	display: none;
+}

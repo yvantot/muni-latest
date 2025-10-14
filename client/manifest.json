@@ -1,0 +1,39 @@
+{
+    "manifest_version": 3,
+    "name": "Muni",
+    "author": "Jun Ivanne Dalman",
+    "version": "1.0.0",
+    "description": "Learn while you browse the internet.",
+    "homepage_url": "https://yvantot.netlify.app",
+    "permissions": [
+        "storage",
+        "unlimitedStorage",
+        "windows",
+        "tabs"
+    ],
+    "content_scripts": [
+        {
+            "js": [
+                "./js/inject.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ],
+            "world": "ISOLATED"
+        }
+    ],
+    "chrome_url_overrides": {
+        "newtab": "./html/index.html"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "css/inject.css",
+                "assets/Quicksand.ttf"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}

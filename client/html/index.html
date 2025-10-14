@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Newtab - Muni</title>
+		<link rel="stylesheet" href="../css/index.css" />
+		<script src="../js/index.js" defer type="module"></script>
+	</head>
+	<body>
+		<svg class="no-display">
+			<symbol id="edit" viewBox="0 -960 960 960">
+				<path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z" />
+			</symbol>
+			<symbol id="togglestate" viewBox="0 -960 960 960">
+				<path d="M200-312v-336l240 168-240 168Zm320-8v-320h80v320h-80Zm160 0v-320h80v320h-80Z" />
+			</symbol>
+			<symbol id="delete" viewBox="0 -960 960 960">
+				<path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" />
+			</symbol>
+			<symbol id="add" viewBox="0 -960 960 960">
+				<path d="M440-280h80v-160h160v-80H520v-160h-80v160H280v80h160v160ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z" />
+			</symbol>
+			<symbol id="sort" viewBox="0 -960 960 960">
+				<path d="m80-280 150-400h86l150 400h-82l-34-96H196l-32 96H80Zm140-164h104l-48-150h-6l-50 150Zm328 164v-76l202-252H556v-72h282v76L638-352h202v72H548ZM360-760l120-120 120 120H360ZM480-80 360-200h240L480-80Z" />
+			</symbol>
+			<symbol id="library" viewBox="0 -960 960 960">
+				<path d="M300-80q-58 0-99-41t-41-99v-520q0-58 41-99t99-41h500v600q-25 0-42.5 17.5T740-220q0 25 17.5 42.5T800-160v80H300Zm-60-267q14-7 29-10t31-3h20v-440h-20q-25 0-42.5 17.5T240-740v393Zm160-13h320v-440H400v440Zm-160 13v-453 453Zm60 187h373q-6-14-9.5-28.5T660-220q0-16 3-31t10-29H300q-26 0-43 17.5T240-220q0 26 17 43t43 17Z" />
+			</symbol>
+			<symbol id="generate" viewBox="0 -960 960 960">
+				<path d="M200-120q-33 0-56.5-23.5T120-200v-400q0-100 70-170t170-70h240q100 0 170 70t70 170v400q0 33-23.5 56.5T760-120H200Zm0-80h560v-400q0-66-47-113t-113-47H360q-66 0-113 47t-47 113v400Zm160-280q-33 0-56.5-23.5T280-560q0-33 23.5-56.5T360-640q33 0 56.5 23.5T440-560q0 33-23.5 56.5T360-480Zm240 0q-33 0-56.5-23.5T520-560q0-33 23.5-56.5T600-640q33 0 56.5 23.5T680-560q0 33-23.5 56.5T600-480ZM280-200v-80q0-33 23.5-56.5T360-360h240q33 0 56.5 23.5T680-280v80h-80v-80h-80v80h-80v-80h-80v80h-80Zm-80 0h560-560Z" />
+			</symbol>
+			<symbol id="setting" viewBox="0 -960 960 960">
+				<path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z" />
+			</symbol>
+			<symbol id="account" viewBox="0 -960 960 960">
+				<path d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z" />
+			</symbol>
+			<symbol id="help" viewBox="0 -960 960 960">
+				<path d="M478-240q21 0 35.5-14.5T528-290q0-21-14.5-35.5T478-340q-21 0-35.5 14.5T428-290q0 21 14.5 35.5T478-240Zm-36-154h74q0-33 7.5-52t42.5-52q26-26 41-49.5t15-56.5q0-56-41-86t-97-30q-57 0-92.5 30T342-618l66 26q5-18 22.5-39t53.5-21q32 0 48 17.5t16 38.5q0 20-12 37.5T506-526q-44 39-54 59t-10 73Zm38 314q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+			</symbol>
+			<symbol id="x" viewBox="0 -960 960 960">
+				<path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+			</symbol>
+			<symbol id="check" viewBox="0 -960 960 960">
+				<path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+			</symbol>
+			<symbol id="back" viewBox="0 -960 960 960">
+				<path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+			</symbol>
+		</svg>
+		<main>
+			<section class="settings-icon">
+				<!-- upper settings -->
+				<nav class="upper container">
+					<button id="s-library">
+						<svg><use href="#library" /></svg>
+					</button>
+					<button id="s-generate">
+						<svg><use href="#generate" /></svg>
+					</button>
+					<button id="s-popset">
+						<svg><use href="#setting" /></svg>
+					</button>
+				</nav>
+				<!-- lower settings -->
+				<nav class="lower container">
+					<button id="s-help">
+						<svg><use href="#help" /></svg>
+					</button>
+					<!-- TBD -->
+					<button id="s-account" class="no-display">
+						<svg><use href="#account" /></svg>
+					</button>
+				</nav>
+			</section>
+			<section class="settings-body">
+				<div class="header">
+					<div class="container">
+						<h1 class="title">POP APP</h1>
+						<span class="vline"></span>
+						<p class="description">Remember everything forever<br />while browsing the internet</p>
+					</div>
+					<span class="hline hspacebot"></span>
+				</div>
+				<!-- Library -->
+				<div id="b-library">
+					<div class="header">
+						<div class="container">
+							<h1 class="title">Library</h1>
+							<p class="description">Manage your modules, units and cards</p>
+						</div>
+						<span class="hline hspace"></span>
+					</div>
+					<div class="library-actions">
+						<div class="container">
+							<button id="navigate-back" class="no-display">
+								<svg><use href="#back" /></svg>
+							</button>
+							<div id="mactions">
+								<button id="add-module">
+									<svg><use href="#add" /></svg>
+								</button>
+								<button id="sort-modules">
+									<svg><use href="#sort" /></svg>
+								</button>
+							</div>
+							<div class="no-display" id="uactions">
+								<button id="add-unit">
+									<svg><use href="#add" /></svg>
+								</button>
+								<button id="sort-units">
+									<svg><use href="#sort" /></svg>
+								</button>
+							</div>
+							<div class="no-display" id="cactions">
+								<button id="add-card">
+									<svg><use href="#add" /></svg>
+								</button>
+								<button id="sort-cards">
+									<svg><use href="#sort" /></svg>
+								</button>
+							</div>
+						</div>
+						<span class="hline hspace"></span>
+					</div>
+					<div class="navigation">
+						<p>Path:</p>
+						<p id="current-library-page">Modules</p>
+						<p>-</p>
+						<p id="current-library-path">Modules > ... > ...</p>
+					</div>
+					<div id="content" class="content"></div>
+				</div>
+				<!-- Generate -->
+				<div class="no-display" id="b-generate">
+					<div class="header">
+						<div class="container">
+							<h1 class="title">Generate</h1>
+							<p class="description">Generate cards for every topic</p>
+						</div>
+						<span class="hline hspace"></span>
+					</div>
+				</div>
+				<!-- Popup Settings -->
+				<div class="no-display" id="b-popset">
+					<div class="header">
+						<div class="container">
+							<h1 class="title">Popup Settings</h1>
+							<p class="description">Configure how popups appear</p>
+						</div>
+						<span class="hline hspace"></span>
+					</div>
+					<div class="information">
+						<div class="ques">
+							<p class="rule-title">Learning Mode :</p>
+							<p class="rule-description">- Short-term mode is for fast-learning but easy-to-forget (exams, quizzes...)</p>
+							<p class="rule-description">- Long-term mode is for slow-learning but hard-to-forget (language learning, concept mastery...)</p>
+							<div class="rule-action">
+								<div class="checkbox">
+									<input type="radio" id="short-term-learning" name="learning-mode" checked />
+									<label for="short-term-learning">Short-term </label>
+								</div>
+								<div class="checkbox">
+									<input type="radio" id="long-term-learning" name="learning-mode" />
+									<label for="long-term-learning">Long-term </label>
+								</div>
+							</div>
+						</div>
+						<div class="ques">
+							<p class="rule-title">Popup Interval :</p>
+							<p class="rule-description">(Short Term) The time before another card popup again in minutes</p>
+							<div class="rule-action">
+								<input type="number" placeholder="In minutes... e.g 5" id="intervalms" />
+								<button id="intervalbtn">Set</button>
+							</div>
+						</div>
+						<div class="ques">
+							<p class="rule-title">Popup Whitelist :</p>
+							<p class="rule-description">Whitelist websites where POP APP won't pop up cards</p>
+							<div class="rule-action">
+								<input type="text" placeholder="Separate with ',' e.g gmail.com, meet.google.com " id="whitelist" />
+								<button id="whitelistbtn">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="no-display" id="b-help">
+					<div class="header">
+						<div class="container">
+							<h1 class="title">Help</h1>
+							<p class="description">Make the best of Pop App</p>
+						</div>
+						<span class="hline hspace"></span>
+					</div>
+				</div>
+				<div class="no-display" id="b-account">
+					<div class="header">
+						<div class="container">
+							<h1 class="title">Account Settings</h1>
+							<p class="description">Configure your account data</p>
+						</div>
+						<span class="hline hspace"></span>
+					</div>
+				</div>
+			</section>
+			<section class="main">
+				<div id="scard-container"></div>
+			</section>
+		</main>
+
+		<!-- Utilities -->
+		<!-- It would be good if I add modules and add units and add cards, like a callback -->
+		<!-- MODULES -->
+		<div id="module-add" class="popup-box no-display">
+			<div class="main">
+				<div class="header">
+					<div class="container">
+						<h1 class="title">Add New Module</h1>
+						<p class="description">You must fill every information</p>
+					</div>
+					<span class="hline hspace"></span>
+				</div>
+				<div class="information">
+					<div class="ques">
+						<p>Title :</p>
+						<input type="text" placeholder="..." id="mtitle" />
+					</div>
+					<div class="ques">
+						<p>Description :</p>
+						<input type="text" placeholder="..." id="mdesc" />
+					</div>
+					<div class="ques">
+						<p>Author :</p>
+						<input type="text" placeholder="..." id="mauth" />
+					</div>
+					<div class="ques">
+						<p>Icon :</p>
+						<input type="text" placeholder="..." id="micon" />
+					</div>
+				</div>
+				<div class="actions">
+					<button id="mconfedit">
+						<svg><use href="#check" /></svg>
+					</button>
+					<button id="mconf">
+						<svg><use href="#check" /></svg>
+					</button>
+					<button id="mcanc">
+						<svg><use href="#x" /></svg>
+					</button>
+				</div>
+			</div>
+		</div>
+		<!-- UNITS -->
+		<div id="unit-add" class="popup-box no-display">
+			<div class="main">
+				<div class="header">
+					<div class="container">
+						<h1 class="title">Add New Unit</h1>
+						<p class="description">You must fill every information</p>
+					</div>
+					<span class="hline hspace"></span>
+				</div>
+				<div class="information">
+					<div class="ques">
+						<p>Title :</p>
+						<input type="text" placeholder="..." id="utitle" />
+					</div>
+					<div class="ques">
+						<p>Description :</p>
+						<input type="text" placeholder="..." id="udesc" />
+					</div>
+					<div class="ques">
+						<p>Icon :</p>
+						<input type="text" placeholder="..." id="uicon" />
+					</div>
+				</div>
+				<div class="actions">
+					<button id="uconfedit">
+						<svg><use href="#check" /></svg>
+					</button>
+					<button id="uconf">
+						<svg><use href="#check" /></svg>
+					</button>
+					<button id="ucanc">
+						<svg><use href="#x" /></svg>
+					</button>
+				</div>
+			</div>
+		</div>
+		<!-- CARDS -->
+		<div id="card-add" class="popup-box no-display">
+			<div class="main">
+				<div class="header">
+					<div class="container">
+						<h1 class="title">Add New Card</h1>
+						<p class="description">You must fill every information</p>
+					</div>
+					<span class="hline hspace"></span>
+				</div>
+				<p>Type of Question:</p>
+				<div id="qtype">
+					<div data-feature="fl">
+						<input type="radio" name="qtype" value="0" id="fl" checked />
+						<label for="fl">Flashcard</label>
+					</div>
+					<div data-feature="tf">
+						<input type="radio" name="qtype" value="1" id="tf" />
+						<label for="tf">True or False</label>
+					</div>
+					<div data-feature="id">
+						<input type="radio" name="qtype" value="2" id="id" />
+						<label for="id">Identification</label>
+					</div>
+					<div data-feature="mt">
+						<input type="radio" name="qtype" value="3" id="mt" />
+						<label for="mt">Multiple Choice</label>
+					</div>
+				</div>
+				<div class="information">
+					<div class="ques" id="cquestionc">
+						<p>Question Image :</p>
+						<input type="file" accept="image/*" id="cimage" />
+					</div>
+					<div class="ques" id="cquestionc">
+						<p>Question :</p>
+						<input type="text" placeholder="..." id="cquestion" />
+					</div>
+					<div class="ques" id="canswerc">
+						<p>Answer :</p>
+						<input type="text" placeholder="..." id="canswer" />
+					</div>
+					<div class="ques no-display" id="cchoicesc">
+						<p>Choices :</p>
+						<input type="text" placeholder="Separate choices with ',' e.g 1, 2, 3" id="cchoices" />
+					</div>
+					<div id="ccorrectc" class="no-display">
+						<p>Click the correct answer :</p>
+						<div id="correctc"></div>
+					</div>
+				</div>
+				<div class="actions">
+					<button id="cconfedit">
+						<svg><use href="#check" /></svg>
+					</button>
+					<button id="cconf">
+						<svg><use href="#check" /></svg>
+					</button>
+					<button id="ccanc">
+						<svg><use href="#x" /></svg>
+					</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
