@@ -4,6 +4,8 @@ import { getElements } from "./elements.js";
 import { getStruct, Q_TYPES } from "./struct.js";
 import { show_popup, create_element, dateToYYYYMMDD, getIndexes, toBase64 } from "./utilities.js";
 
+import { buildPrompt } from "./generate.js";
+
 const browser = window.browser || window.chrome;
 const local = browser.storage.local;
 

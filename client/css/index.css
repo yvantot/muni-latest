@@ -80,6 +80,7 @@ body {
 #b-popset,
 #b-help,
 #b-account,
+#b-note,
 #module-add,
 #unit-add,
 #card-add {
@@ -153,11 +154,19 @@ main {
 				font-size: 0.7rem;
 			}
 		}
-		#b-popset {
+		#b-popset,
+		#b-generate,
+		#b-note {
 			.information {
 				display: flex;
 				flex-direction: column;
 				gap: 1rem;
+				button {
+					font-size: 0.8rem;
+					padding: 0.25rem;
+					aspect-ratio: initial;
+					flex-grow: 1;
+				}
 				.ques {
 					display: flex;
 					gap: 0.5rem;
@@ -182,12 +191,6 @@ main {
 							padding: 0.3rem;
 							border-radius: 0.5rem;
 							border: 1px solid var(--ogray);
-						}
-						button {
-							font-size: 0.8rem;
-							padding: 0.25rem;
-							aspect-ratio: initial;
-							flex-grow: 1;
 						}
 
 						.checkbox {
@@ -438,6 +441,46 @@ main {
 		}
 	}
 }
+#qtype {
+	display: grid;
+	padding: 0.5rem;
+	background-color: var(--dgray);
+	margin: 0.5rem 0;
+	border-radius: 0.5rem;
+	grid-template-columns: repeat(2, 1fr);
+	border: 1px solid var(--ogray);
+	justify-items: center;
+	align-items: center;
+	div {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+		flex-direction: column;
+		gap: 0.5rem;
+
+		label {
+			margin: 0.25rem;
+			border: 1px solid var(--ogray);
+			background-color: var(--lgtgray);
+			padding: 0.5rem;
+			border-radius: 0.5rem;
+			cursor: pointer;
+			text-align: center;
+			font-size: 0.7rem;
+		}
+
+		input:checked + label {
+			border: none;
+			background-color: var(--green);
+		}
+
+		input {
+			display: none;
+
+			border: none;
+		}
+	}
+}
 
 .popup-box > .main {
 	display: flex;
@@ -452,46 +495,6 @@ main {
 
 	p {
 		font-size: 0.8rem;
-	}
-	#qtype {
-		display: grid;
-		padding: 0.5rem;
-		background-color: var(--dgray);
-		margin: 0.5rem 0;
-		border-radius: 0.5rem;
-		grid-template-columns: repeat(2, 1fr);
-		border: 1px solid var(--ogray);
-		justify-items: center;
-		align-items: center;
-		div {
-			display: flex;
-			width: 100%;
-			justify-content: center;
-			flex-direction: column;
-			gap: 0.5rem;
-
-			label {
-				margin: 0.25rem;
-				border: 1px solid var(--ogray);
-				background-color: var(--lgtgray);
-				padding: 0.5rem;
-				border-radius: 0.5rem;
-				cursor: pointer;
-				text-align: center;
-				font-size: 0.7rem;
-			}
-
-			input:checked + label {
-				border: none;
-				background-color: var(--green);
-			}
-
-			input {
-				display: none;
-
-				border: none;
-			}
-		}
 	}
 
 	.information {
@@ -666,4 +669,22 @@ main {
 .help-description {
 	text-align: center;
 	font-size: 0.8rem;
+}
+:disabled + label {
+	cursor: not-allowed !important;
+	opacity: 0.25;
+}
+#b-generate,
+#b-note {
+	textarea {
+		border: 1px solid var(--ogray);
+		font-size: 0.8rem;
+		padding: 0.5rem;
+		border-radius: 0.5rem;
+		resize: vertical;
+		min-height: 30vh;
+	}
+	button:hover {
+		transform: none !important;
+	}
 }

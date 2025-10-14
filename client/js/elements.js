@@ -4,6 +4,7 @@ export function getElements() {
 			return {
 				LIBRARY: document.getElementById("s-library"),
 				GENERATE: document.getElementById("s-generate"),
+				NOTE: document.getElementById("s-note"),
 				POPSET: document.getElementById("s-popset"),
 				HELP: document.getElementById("s-help"),
 				ACCOUNT: document.getElementById("s-account"),
@@ -13,6 +14,7 @@ export function getElements() {
 			return {
 				LIBRARY: document.getElementById("b-library"),
 				GENERATE: document.getElementById("b-generate"),
+				NOTE: document.getElementById("b-note"),
 				POPSET: document.getElementById("b-popset"),
 				HELP: document.getElementById("b-help"),
 				ACCOUNT: document.getElementById("b-account"),
