@@ -52,10 +52,10 @@ function injectStyle(parent) {
 function isWhitelisted(udata) {
 	const whitelist = udata.settings.rules.whitelist;
 	const sites = whitelist.split(",");
+	console.log(sites);
 	if (sites.length > 0) {
 		for (const i in sites) {
-			if (window.location.href.includes(i)) {
-				alert("This site is whitelisted");
+			if (window.location.href.includes(sites[i])) {
 				return true;
 			}
 		}
@@ -69,6 +69,7 @@ async function init() {
 
 	const udata = await local.get(null);
 	if (udata.inject.answered) startCounting(udata);
+	if (isWhitelisted(udata)) return;
 
 	const { root, element } = create_element("div", { id: "popapp-main", shadow: true });
 	document.documentElement.appendChild(element);
@@ -83,7 +84,7 @@ async function init() {
 
 	local.onChanged.addListener(async () => {
 		const udata = await local.get(null);
-
+		if (isWhitelisted(udata)) return;
 		if (udata.inject.answered) startCounting(udata);
 
 		renderSessCard(udata, container);

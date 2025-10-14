@@ -40,6 +40,17 @@ const POPUPS = {
 			bg_color: "hsl(0, 0%, 10%)",
 			text_color: "hsl(0, 0%, 90%)",
 		}),
+	complete_edit: () =>
+		show_popup({
+			block_outside: true,
+			title: "Edit successfully",
+			description: "Yay!",
+			icon: '<svg><use href="#check"/></svg>',
+			action: "Thanks",
+			width: 30,
+			bg_color: "hsl(0, 0%, 10%)",
+			text_color: "hsl(0, 0%, 90%)",
+		}),
 	incomplete_input: () =>
 		show_popup({
 			block_outside: true,
@@ -282,6 +293,7 @@ function addListenerLibrary() {
 
 		udata.reason.push(REASON.MODULE);
 
+		POPUPS.complete_edit();
 		await local.set(udata);
 		mAddExit();
 	});
@@ -362,6 +374,7 @@ function addListenerLibrary() {
 
 		udata.reason.push(REASON.UNIT);
 
+		POPUPS.complete_edit();
 		await local.set(udata);
 		uAddExit();
 	});
@@ -529,6 +542,7 @@ function addListenerLibrary() {
 			}
 		}
 
+		POPUPS.complete_edit();
 		udata.reason.push(REASON.CARD);
 		await local.set(udata);
 	});

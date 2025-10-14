@@ -633,3 +633,37 @@ main {
 		}
 	}
 }
+.correctans {
+	background-color: var(--green) !important;
+	* {
+		color: var(--drkgray) !important;
+		border: none !important;
+	}
+	*:hover {
+		background-color: var(--green) !important;
+		border: none !important;
+	}
+	.choices,
+	.level {
+		visibility: hidden !important;
+	}
+}
+.wrongans {
+	background-color: var(--red) !important;
+	* {
+		color: var(--drkgray) !important;
+		border: none !important;
+	}
+	*:hover {
+		background-color: var(--red) !important;
+		border: none !important;
+	}
+	.choices,
+	.level {
+		visibility: hidden !important;
+	}
+}
+.help-description {
+	text-align: center;
+	font-size: 0.8rem;
+}

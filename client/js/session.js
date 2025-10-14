@@ -136,6 +136,14 @@ function makeSessCard(data, udata) {
 	const choices = element.querySelector(".choices");
 	const input = element.querySelector("input");
 
+	function wrong_answer() {
+		element.classList.add("wrongans");
+	}
+
+	function correct_answer() {
+		element.classList.add("correctans");
+	}
+
 	if (data.card_type === Q_TYPES.ID) {
 		element.addEventListener("click", ({ target }) => {
 			if (target.closest("input")) return;
@@ -150,8 +158,13 @@ function makeSessCard(data, udata) {
 				const card = udata.modules[moduleIndex].units[unitIndex].cards[cardIndex];
 
 				if (mode === SCHED_MODE.SHORT) {
-					if (card.answer.toLowerCase() === input.value.toLowerCase()) card.level = Math.min(card.level + 2, 10);
-					else card.level = Math.max(card.level - 1, 1);
+					if (card.answer.toLowerCase() === input.value.toLowerCase()) {
+						card.level = Math.min(card.level + 2, 10);
+						correct_answer();
+					} else {
+						card.level = Math.max(card.level - 1, 1);
+						wrong_answer();
+					}
 				} else if (mode === SCHED_MODE.LONG) {
 					if (card.answer.toLowerCase() === input.value.toLowerCase()) {
 						card.repetitions += 1;
@@ -163,17 +176,20 @@ function makeSessCard(data, udata) {
 							card.interval = Math.round(card.interval * card.easiness);
 						}
 						card.easiness = Math.max(1.3, card.easiness + (0.1 - (4 - (2 - 1)) * (0.08 + (4 - (2 - 1)) * 0.02)));
+						correct_answer();
 					} else {
 						card.repetitions = 0;
 						card.interval = 1;
 						card.easiness = Math.max(1.3, card.easiness - 0.2);
+						wrong_answer();
 					}
 					card.next_review = calculate_next_review(card.interval);
 				}
 
 				udata.inject.answered = true;
 				udata.inject.time = String(new Date());
-				await local.set(udata);
+
+				setTimeout(async () => await local.set(udata), 500);
 			}
 		});
 	}
@@ -203,8 +219,10 @@ function makeSessCard(data, udata) {
 			if (mode === SCHED_MODE.SHORT) {
 				if (index === data.answer) {
 					card.level = Math.min(card.level + increment, 10);
+					correct_answer();
 				} else {
 					card.level = 1;
+					wrong_answer();
 				}
 			} else if (mode === SCHED_MODE.LONG) {
 				if (index === data.answer) {
@@ -217,17 +235,19 @@ function makeSessCard(data, udata) {
 						card.interval = Math.round(card.interval * card.easiness);
 					}
 					card.easiness = Math.max(1.3, card.easiness + (0.1 - (4 - (2 - 1)) * (0.08 + (4 - (2 - 1)) * 0.02)));
+					correct_answer();
 				} else {
 					card.repetitions = 0;
 					card.interval = 1;
 					card.easiness = Math.max(1.3, card.easiness - 0.2);
+					wrong_answer();
 				}
 				card.next_review = calculate_next_review(card.interval);
 			}
 
 			udata.inject.answered = true;
 			udata.inject.time = String(new Date());
-			await local.set(udata);
+			setTimeout(async () => await local.set(udata), 500);
 		});
 	}
 
