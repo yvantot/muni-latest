@@ -51,6 +51,37 @@ const POPUPS = {
 			bg_color: "hsl(0, 0%, 10%)",
 			text_color: "hsl(0, 0%, 90%)",
 		}),
+	welcome: () =>
+		show_popup(
+			{
+				block_outside: true,
+				title: "Hi, welcome!",
+				description: "We're a bunch of BSCS students on a mission to make studying way easier (and a lot more fun)!<br><br>So what exactly is this thing we built 🤔?<br><br>Meet POP-APP — your brain's new best friend. It helps you lock in what you learn and remember it forever, right inside your browser!<br><br>Scrolling through TikTok? No problem — you can still sneak in a quick review with POP-APP.<br><br>We built this to make studying smoother, smarter, and to help you build stronger digital habits along the way.",
+				icon: '<svg><use href="#help"/></svg>',
+				action: "Hmm, how?",
+				width: 30,
+				bg_color: "hsla(0, 56%, 22%, 1.00)",
+				text_color: "hsl(0, 0%, 90%)",
+			},
+			() =>
+				show_popup(
+					{
+						block_outside: true,
+						title: "Easier than you think!",
+						description: "Hit that + button to create your own modules — think of them like subjects! For example, if you're studying English, that's your module.<br><br>Inside your English module, you can have units like Grammar, Vocabulary, or Literature. Each unit can then hold different cards — fun facts, key concepts, or bite-sized lessons that make learning stick.<br><br>These cards will pop up on your new tab page (or any tab you open) to keep your brain in gear — unless you've whitelisted a site, of course 👀.<br><br>You can choose between two smart scheduling algorithms to decide how often your cards appear — check out the Settings section for the full breakdown.<br><br>And if you don't feel like typing everything yourself, let our AI do the heavy lifting — it can automatically generate flashcards for you, turning your study notes into memory gold.",
+						icon: '<svg><use href="#check"/></svg>',
+						action: "Thanks. Never show up again.",
+						width: 30,
+						bg_color: "hsla(0, 56%, 22%, 1.00)",
+						text_color: "hsl(0, 0%, 90%)",
+					},
+					async () => {
+						const udata = await local.get(null);
+						udata.settings.rules.shown_tips_new = true;
+						await local.set(udata);
+					}
+				)
+		),
 };
 
 init();
@@ -131,6 +162,8 @@ async function init() {
 	renderSessCard(udata, SCARDC);
 	updateUISetting(udata);
 
+	if (udata.settings.rules.shown_tips_new === false) POPUPS.welcome();
+
 	local.onChanged.addListener(async () => {
 		const udata = await local.get(null);
 		if (udata.reason.length > 0) console.log(udata);
@@ -174,6 +207,7 @@ async function initStorage() {
 			modules: [],
 			settings: {
 				rules: {
+					shown_tips_new: false,
 					whitelist: "",
 					learning_mode: "short",
 					interval_ms: 60000 * 5,
@@ -667,7 +701,7 @@ function makeCard(data) {
 		</div>
 		<span class="hline hspacetop"></span>
 		<div class="meta">
-			<p>Level: ${data.level}</p>
+			<p> ${data.level > 5 ? "Done" : "Level: " + data.level}</p>
 			<p>Next: ${dateToYYYYMMDD(new Date(data.next_review))}</p>
 		</div>
 		<span class="hline"></span>

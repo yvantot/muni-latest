@@ -49,6 +49,21 @@ function injectStyle(parent) {
 	parent.append(link);
 }
 
+function isWhitelisted(udata) {
+	const whitelist = udata.settings.rules.whitelist;
+	const sites = whitelist.split(",");
+	if (sites.length > 0) {
+		for (const i in sites) {
+			if (window.location.href.includes(i)) {
+				alert("This site is whitelisted");
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 async function init() {
 	await initStorage();
 
