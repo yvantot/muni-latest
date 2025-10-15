@@ -52,7 +52,6 @@ function injectStyle(parent) {
 function isWhitelisted(udata) {
 	const whitelist = udata.settings.rules.whitelist;
 	const sites = whitelist.split(",");
-	console.log(sites);
 	if (sites.length > 0) {
 		for (const i in sites) {
 			if (window.location.href.includes(sites[i])) {

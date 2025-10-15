@@ -256,7 +256,12 @@ function addListenerLibrary() {
 		CANS.value = "";
 		CCHO.value = "";
 		CQUE.value = "";
+
 		CCONT.classList.add("no-display");
+		const image = CIMG.files[0];
+		if (image) {
+			CIMG.value = "";
+		}
 	};
 
 	// MODULES
