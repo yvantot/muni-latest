@@ -296,7 +296,7 @@ function addListenerLibrary() {
 		const title = MTITLE.value;
 		const icon = MICON.value;
 
-		if (author.trim() === "" || description.trim() === "" || title.trim() === "") {
+		if (description.trim() === "" || title.trim() === "") {
 			POPUPS.incomplete_input();
 			return;
 		}
