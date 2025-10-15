@@ -54,13 +54,13 @@ function isWhitelisted(udata) {
 	const sites = whitelist.split(",");
 	if (sites.length > 0) {
 		for (const i in sites) {
-			if (window.location.href.includes(sites[i])) {
-				return true;
+			if (sites[i].trim() !== "" && window.location.href.includes(sites[i])) {
+				hidePopapp();
+				return;
 			}
 		}
 	}
-
-	return false;
+	showPopapp();
 }
 
 async function init() {
@@ -68,7 +68,6 @@ async function init() {
 
 	const udata = await local.get(null);
 	if (udata.inject.answered) startCounting(udata);
-	if (isWhitelisted(udata)) return;
 
 	const { root, element } = create_element("div", { id: "popapp-main", shadow: true });
 	document.documentElement.appendChild(element);
@@ -80,13 +79,13 @@ async function init() {
 	root.append(container);
 
 	renderSessCard(udata, container);
-
+	isWhitelisted(udata);
 	local.onChanged.addListener(async () => {
 		const udata = await local.get(null);
-		if (isWhitelisted(udata)) return;
 		if (udata.inject.answered) startCounting(udata);
 
 		renderSessCard(udata, container);
+		isWhitelisted(udata);
 	});
 }
 
