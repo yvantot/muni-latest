@@ -441,7 +441,8 @@ main {
 		}
 	}
 }
-#qtype {
+#qtype,
+#qtypeai {
 	display: grid;
 	padding: 0.5rem;
 	background-color: var(--dgray);

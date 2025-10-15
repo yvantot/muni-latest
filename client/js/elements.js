@@ -27,6 +27,8 @@ export function getElements() {
 		},
 		getLibraryElements: () => {
 			return {
+				CURRPAGE: document.getElementById("current-library-page"),
+				CURRPATH: document.getElementById("current-library-path"),
 				CONTENT: document.getElementById("content"),
 				NBACK: document.getElementById("navigate-back"),
 				MACT: document.getElementById("mactions"),
@@ -38,6 +40,23 @@ export function getElements() {
 				USORT: document.getElementById("sort-units"),
 				CADD: document.getElementById("add-card"),
 				CSORT: document.getElementById("sort-cards"),
+			};
+		},
+		getNoteElements: () => {
+			return {
+				UPROMPT: document.getElementById("userprompt"),
+				GENERATE: document.getElementById("parsenote"),
+			};
+		},
+		getGenerateElements: () => {
+			return {
+				GPTSOURCE: document.getElementById("chatgpt"),
+				GEMINISOURCE: document.getElementById("gemini"),
+				UPROMPT: document.getElementById("userpromptai"),
+				QTYPE: document.getElementById("qtypeai"),
+				UCOUNT: document.getElementById("unitcount"),
+				CCOUNT: document.getElementById("cardcount"),
+				GENERATE: document.getElementById("generate"),
 			};
 		},
 		getSettingElements: () => {

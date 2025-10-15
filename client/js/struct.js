@@ -46,3 +46,16 @@ export const Q_TYPES = {
 	ID: 2,
 	MT: 3,
 };
+
+export const NAVIGATION = {
+	MODULES: 0,
+	UNITS: 1,
+	CARDS: 2,
+};
+
+export const REASON = {
+	MODULE: 0,
+	UNIT: 1,
+	CARD: 2,
+	SCARD: 3,
+};

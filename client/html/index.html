@@ -133,8 +133,8 @@
 					<div class="navigation">
 						<p>Path:</p>
 						<p id="current-library-page">Modules</p>
-						<p>-</p>
-						<p id="current-library-path">Modules > ... > ...</p>
+						<p>:</p>
+						<p id="current-library-path">. ></p>
 					</div>
 					<div id="content" class="content"></div>
 				</div>
@@ -165,12 +165,12 @@
 						<div class="ques">
 							<p class="rule-title">Information :</p>
 							<p class="rule-description">- You should input here the relevant information for the cards you want to generate. Or you can just input the name of the topic like Math.</p>
-							<textarea id="userprompt" placeholder="Hola, the text you will put here will be used by AI to create cards for you. Your data will be sent over 3rd party services we do not control. Do not put privacy sensitive topics here."></textarea>
+							<textarea id="userpromptai" placeholder="Hola, the text you will put here will be used by AI to create cards for you. Your data will be sent over 3rd party services we do not control. Do not put privacy sensitive topics here."></textarea>
 						</div>
 						<div class="ques">
 							<p class="rule-title">Question Types :</p>
 							<p class="rule-description">- Note: Check at least one.</p>
-							<div id="qtype">
+							<div id="qtypeai">
 								<div data-feature="fl">
 									<input type="checkbox" name="qtype" value="0" id="fl" checked />
 									<label for="fl">Flashcard</label>
@@ -275,9 +275,15 @@
 					</div>
 					<div class="information">
 						<div class="ques">
-							<p class="rule-title">Notes :</p>
+							<p class="rule-title">Instruction :</p>
 							<p class="rule-description">- You can create cards with just a note! POP-APP will parse your input using the below format.</p>
-							<textarea id="userprompt" placeholder="Hola, the text you will put here will be used by AI to create cards for you. Your data will be sent over 3rd party services we do not control. Do not put privacy sensitive topics here."></textarea>
+							<p class="rule-description">-mtitle=Module Title<br />-mdesc=Module Description<br />-micon=Module Icon<br />-utitle=Unit Title<br />-udesc=Unit Description<br />-uicon=Unit Icon<br />-front=Flashcard Front<br />-back=Flashcard Back<br />-ique=Identification Question<br />-ians=Identification Answer<br />-tque=True or False Question<br />-tf=T/F<br />-mque=Multiple Question<br />-choices=1,2,3<br />-choice=0</p>
+							<textarea id="userprompt" placeholder="This allows you to take a note while studying and feed it directly to POP-APP for automatic card creation"></textarea>
+						</div>
+						<div class="ques">
+							<div class="rule-action">
+								<button id="parsenote">Generate</button>
+							</div>
 						</div>
 					</div>
 				</div>

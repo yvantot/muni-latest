@@ -1,29 +1,15 @@
+import { addListenerParse } from "./parse.js";
 import { renderSessCard } from "./session.js";
 import { addListenerSetting, updateUISetting } from "./settings.js";
 import { getElements } from "./elements.js";
-import { getStruct, Q_TYPES } from "./struct.js";
+import { getStruct, Q_TYPES, NAVIGATION, REASON } from "./struct.js";
 import { show_popup, create_element, dateToYYYYMMDD, getIndexes, toBase64 } from "./utilities.js";
-
-import { buildPrompt } from "./generate.js";
 
 const browser = window.browser || window.chrome;
 const local = browser.storage.local;
 
 let INTERVALS = {
 	timer: null,
-};
-
-const NAVIGATION = {
-	MODULES: 0,
-	UNITS: 1,
-	CARDS: 2,
-};
-
-const REASON = {
-	MODULE: 0,
-	UNIT: 1,
-	CARD: 2,
-	SCARD: 3,
 };
 
 let currnav = NAVIGATION.MODULES;
@@ -120,16 +106,19 @@ function startCounting(udata) {
 
 function renderModules(udata, parent) {
 	parent.innerHTML = "";
+	updatePath("Modules", ". >");
 	if (udata.modules.length > 0) parent.append(makeModules(udata.modules));
 }
 
 function renderUnits(udata, moduleIndex, parent) {
 	parent.innerHTML = "";
+	updatePath("Units", `${udata.modules[moduleIndex].title} >`);
 	if (udata.modules[moduleIndex].units.length > 0) parent.append(makeUnits(udata.modules[moduleIndex].units));
 }
 
 function renderCards(udata, moduleIndex, unitIndex, parent) {
 	parent.innerHTML = "";
+	updatePath("Units", `${udata.modules[moduleIndex].title} > ${udata.modules[moduleIndex].units[unitIndex].title} >`);
 	if (udata.modules[moduleIndex].units[unitIndex].cards.length > 0) parent.append(makeCards(udata.modules[moduleIndex].units[unitIndex].cards));
 }
 
@@ -160,6 +149,7 @@ async function init() {
 	addListenerSettingSide();
 	addListenerLibrary();
 	addListenerSetting();
+	addListenerParse();
 
 	const udata = await local.get(null);
 	const { getLibraryElements, getSessionBody } = getElements();
@@ -277,7 +267,7 @@ function addListenerLibrary() {
 		const title = MTITLE.value;
 		const icon = MICON.value;
 
-		if (author.trim() === "" || description.trim() === "" || title.trim() === "") {
+		if (description.trim() === "" || title.trim() === "") {
 			POPUPS.incomplete_input();
 			return;
 		}
@@ -960,4 +950,10 @@ function makeModule(data) {
 		}
 	});
 	return element;
+}
+
+function updatePath(page, path) {
+	const { CURRPAGE, CURRPATH } = getElements().getLibraryElements();
+	CURRPAGE.innerText = page;
+	CURRPATH.innerText = path;
 }
