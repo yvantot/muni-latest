@@ -1,4 +1,5 @@
 import { getElements } from "./elements.js";
+import { getLatestId } from "./utilities.js";
 import { getStruct, Q_TYPES, REASON } from "./struct.js";
 
 const browser = window.browser || window.chrome;
@@ -11,8 +12,9 @@ export function addListenerParse() {
 		const prompt = UPROMPT.value.trim();
 		const module = parsePrompt(prompt);
 		const udata = await local.get(null);
-		udata.modules.push(module);
+		module.id = getLatestId(udata.modules);
 
+		udata.modules.push(module);
 		udata.reason.push(REASON.MODULE);
 
 		await local.set(udata);
@@ -21,6 +23,7 @@ export function addListenerParse() {
 
 function parsePrompt(prompt) {
 	const { MODULE } = getStruct();
+
 	const module_info = /(?:-mtitle=(.*)|-mdesc=(.*)|-micon=(.*))/g;
 	const units_grabber = /(-utitle=[\s\S]+?)(?=-utitle=|\s*$)/g;
 	const unit_info = /(?:-utitle=(.*)|-udesc=(.*)|-uicon=(.*))/g;

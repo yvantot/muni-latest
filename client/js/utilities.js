@@ -153,3 +153,12 @@ export function toBase64(file) {
 		reader.readAsDataURL(file);
 	});
 }
+
+export function getLatestId(arr) {
+	let id = 0;
+	for (const i in arr) {
+		if (arr[i].id > id) id = arr[i].id;
+	}
+	if (arr.length !== 0) id += 1;
+	return id;
+}

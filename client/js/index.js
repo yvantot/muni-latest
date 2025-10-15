@@ -3,7 +3,7 @@ import { renderSessCard } from "./session.js";
 import { addListenerSetting, updateUISetting } from "./settings.js";
 import { getElements } from "./elements.js";
 import { getStruct, Q_TYPES, NAVIGATION, REASON } from "./struct.js";
-import { show_popup, create_element, dateToYYYYMMDD, getIndexes, toBase64 } from "./utilities.js";
+import { show_popup, create_element, dateToYYYYMMDD, getIndexes, toBase64, getLatestId } from "./utilities.js";
 
 const browser = window.browser || window.chrome;
 const local = browser.storage.local;
@@ -218,15 +218,6 @@ async function initStorage() {
 			},
 		});
 	}
-}
-
-function getLatestId(arr) {
-	let id = 0;
-	for (const i in arr) {
-		if (arr[i].id > id) id = arr[i].id;
-	}
-	if (arr.length !== 0) id += 1;
-	return id;
 }
 
 function addListenerLibrary() {
