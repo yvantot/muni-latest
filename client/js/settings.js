@@ -1,5 +1,6 @@
 import { show_popup } from "./utilities.js";
 import { getElements } from "./elements.js";
+import { REASON } from "./struct.js";
 
 const browser = window.browser || window.chrome;
 const local = browser.storage.local;
@@ -37,6 +38,8 @@ export function addListenerSetting() {
 		const udata = await local.get(null);
 		udata.settings.rules.learning_mode = "long";
 		POPUPS.set_complete();
+
+		udata.reason.push(REASON.SETTING);
 		await local.set(udata);
 	});
 
@@ -44,6 +47,8 @@ export function addListenerSetting() {
 		const udata = await local.get(null);
 		udata.settings.rules.learning_mode = "short";
 		POPUPS.set_complete();
+
+		udata.reason.push(REASON.SETTING);
 		await local.set(udata);
 	});
 
@@ -51,6 +56,8 @@ export function addListenerSetting() {
 		const udata = await local.get(null);
 		udata.settings.rules.interval_ms = minToMs(INTERVALMS.value);
 		POPUPS.set_complete();
+
+		udata.reason.push(REASON.SETTING);
 		await local.set(udata);
 	});
 
@@ -58,15 +65,16 @@ export function addListenerSetting() {
 		const udata = await local.get(null);
 		udata.settings.rules.whitelist = WHITELIST.value;
 		POPUPS.set_complete();
+		udata.reason.push(REASON.SETTING);
 		await local.set(udata);
 	});
 }
 
-function minToMs(min) {
+export function minToMs(min) {
 	return min * 1000 * 60;
 }
 
-function msToMin(ms) {
+export function msToMin(ms) {
 	if (ms === 0) return 0;
 	return ms / 1000 / 60;
 }

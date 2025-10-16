@@ -22,6 +22,7 @@ export function getElements() {
 		},
 		getSessionBody: () => {
 			return {
+				COUNTDOWN: document.getElementById("countdown"),
 				SCARDC: document.getElementById("scard-container"),
 			};
 		},
@@ -34,6 +35,7 @@ export function getElements() {
 				MACT: document.getElementById("mactions"),
 				UACT: document.getElementById("uactions"),
 				CACT: document.getElementById("cactions"),
+				MIMP: document.getElementById("import-module"),
 				MADD: document.getElementById("add-module"),
 				MSORT: document.getElementById("sort-modules"),
 				UADD: document.getElementById("add-unit"),
@@ -56,7 +58,7 @@ export function getElements() {
 				QTYPE: document.getElementById("qtypeai"),
 				UCOUNT: document.getElementById("unitcount"),
 				CCOUNT: document.getElementById("cardcount"),
-				GENERATE: document.getElementById("generate"),
+				GENERATE: document.getElementById("generatebtn"),
 			};
 		},
 		getSettingElements: () => {
@@ -77,6 +79,8 @@ export function getElements() {
 				MCANC: document.getElementById("mcanc"),
 				MTITLE: document.getElementById("mtitle"),
 				MDESC: document.getElementById("mdesc"),
+				MCONFILE: document.getElementById("mconfile"),
+				MFILE: document.getElementById("mfile"),
 				MAUTH: document.getElementById("mauth"),
 				MICON: document.getElementById("micon"),
 			};

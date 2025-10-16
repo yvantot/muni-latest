@@ -1,5 +1,6 @@
+import { getRegex } from "./regex.js";
 import { getElements } from "./elements.js";
-import { getLatestId } from "./utilities.js";
+import { getLatestId, POPUPS, show_popup } from "./utilities.js";
 import { getStruct, Q_TYPES, REASON } from "./struct.js";
 
 const browser = window.browser || window.chrome;
@@ -11,30 +12,32 @@ export function addListenerParse() {
 	GENERATE.addEventListener("click", async () => {
 		const prompt = UPROMPT.value.trim();
 		const module = parsePrompt(prompt);
+		if (prompt === "" || module == null) {
+			POPUPS.incomplete_input();
+			return;
+		}
 		const udata = await local.get(null);
 		module.id = getLatestId(udata.modules);
 
+		POPUPS.card_added();
+
 		udata.modules.push(module);
 		udata.reason.push(REASON.MODULE);
-
+		udata.reason.push(REASON.SCARD);
 		await local.set(udata);
 	});
 }
 
-function parsePrompt(prompt) {
+export function parsePrompt(str) {
+	if (str == null || str === "") return;
+	const prompt = str.replaceAll(/\\n/g, " ").replaceAll(/\s+/g, " ");
+	console.log(prompt);
 	const { MODULE } = getStruct();
-
-	const module_info = /(?:-mtitle=(.*)|-mdesc=(.*)|-micon=(.*))/g;
-	const units_grabber = /(-utitle=[\s\S]+?)(?=-utitle=|\s*$)/g;
-	const unit_info = /(?:-utitle=(.*)|-udesc=(.*)|-uicon=(.*))/g;
-
-	const fl = /-front=([\s\S]+?)-back=([\s\S]+?)(?=-.+=|\s*$)/g;
-	const id = /-ique=([\s\S]+?)-ians=([\s\S]+?)(?=-.+=|\s*$)/g;
-	const tf = /-tque=([\s\S]+?)-tf=([\s\S]+?)(?=-.+=|\s*$)/g;
-	const mt = /-mque=([\s\S]+?)-choices=([\s\S]+?)-choice=([\s\S]+?)(?=-.+=|\s*$)/g;
+	const { fl, id, module_info, mt, tf, unit_info, units_grabber } = getRegex().getPromptParser();
 
 	const minfo = prompt.matchAll(module_info);
 	for (const i of minfo) {
+		console.log(i);
 		if (i[0].includes("-mtitle")) MODULE.title = i[1];
 		if (i[0].includes("-mdesc")) MODULE.description = i[2];
 		if (i[0].includes("-micon")) MODULE.icon = i[3];
@@ -88,7 +91,7 @@ function parsePrompt(prompt) {
 		for (const j of mts) {
 			const { CARD } = getStruct();
 			CARD.id = cindex;
-			CARD.card_type = Q_TYPES.TF;
+			CARD.card_type = Q_TYPES.MT;
 			CARD.question = j[1];
 			CARD.answers = j[2];
 			CARD.answer = parseInt(j[3]);
@@ -98,5 +101,10 @@ function parsePrompt(prompt) {
 		uindex += 1;
 		MODULE.units.push(UNIT);
 	}
+	if (MODULE.units.length === 0) {
+		POPUPS.incomplete_input();
+		return;
+	}
+
 	return MODULE;
 }

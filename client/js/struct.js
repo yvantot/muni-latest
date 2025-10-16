@@ -58,4 +58,23 @@ export const REASON = {
 	UNIT: 1,
 	CARD: 2,
 	SCARD: 3,
+	SETTING: 4,
+};
+
+export const PARSE = {
+	module: `-mtitle=Module Title
+-mdesc=Module Description
+-micon=Module Icon`,
+	unit: `-utitle=Unit Title
+-udesc=Unit Description
+-uicon=Unit Icon`,
+	fl: `-front=Flashcard Front
+-back=Flashcard Back`,
+	id: `-ique=Identification Question
+-ians=Identification Answer`,
+	tf: `-tque=True or False Question
+-tf=T/F`,
+	mt: `-mque=Multiple Question
+-choices=A,B,C
+-index=0 (correct index of the correct answer, index starts at 0)`,
 };

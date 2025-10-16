@@ -436,6 +436,7 @@ main {
 					justify-content: center;
 					align-items: center;
 					border: 1px solid var(--ogray);
+					text-align: center;
 				}
 			}
 		}
@@ -668,7 +669,7 @@ main {
 }
 .help-description {
 	text-align: center;
-	font-size: 0.8rem;
+	font-size: 0.7rem;
 }
 :disabled + label {
 	cursor: not-allowed !important;
@@ -686,5 +687,55 @@ main {
 	}
 	button:hover {
 		transform: none !important;
+	}
+}
+.required {
+	font-weight: bold;
+	color: var(--green) !important;
+}
+@keyframes show_tooltip {
+	0% {
+		transform: scale(0.9, 0.9);
+		opacity: 0;
+	}
+	20% {
+		transform: scale(1, 1);
+		opacity: 1;
+	}
+	80% {
+		transform: scale(1, 1);
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+.tooltip {
+	display: block;
+	position: fixed;
+	opacity: 0;
+	z-index: 100;
+	border-radius: 0.3rem;
+	background-color: var(--lgtrgray);
+	padding: 0.2rem;
+	animation-name: show_tooltip;
+	animation-duration: 1.5s;
+	animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	animation-delay: 0.3s;
+	animation-fill-mode: forwards;
+	text-align: center;
+	font-size: 0.7rem;
+	pointer-events: none;
+	user-select: none;
+}
+.session {
+	position: relative;
+	#countdown {
+		font-size: 0.8rem;
+		font-weight: bold;
+		position: absolute;
+		top: 0.5rem;
+		left: 50%;
+		transform: translateX(-50%);
 	}
 }

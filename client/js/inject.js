@@ -60,7 +60,48 @@ function isWhitelisted(udata) {
 			}
 		}
 	}
-	showPopapp();
+}
+
+function isScraping() {
+	if (/popapp=true/.test(window.location.search)) return true;
+	return false;
+}
+
+function addListenerScrape() {
+	console.log("Listening");
+	browser.runtime.onMessage.addListener((receive, _, send) => {
+		const { message } = receive;
+		if (message === "is-loaded") {
+			send({ status: true });
+		}
+
+		if (message === "scrape-gpt") {
+			document.querySelector("form div[contentEditable=true]").innerText = receive.prompt;
+			console.log("Pasted the prompt");
+
+			const k = setInterval(() => {}, 1000);
+
+			setTimeout(() => {
+				document.getElementById("composer-submit-button")?.click();
+				console.log("Clicked confirm");
+
+				const x = setInterval(() => {
+					const y = document.getElementById("composer-submit-button")?.getAttribute("disabled");
+					if ("" === y) {
+						console.log("AI finished");
+						clearInterval(x);
+
+						setTimeout(() => {
+							const answers = document.querySelectorAll("div[data-message-author-role='assistant']");
+							send({ data: answers[answers.length - 1]?.innerText });
+							console.log("Sent the data");
+						}, 2000);
+					}
+				}, 1000);
+			}, 1000);
+			return true;
+		}
+	});
 }
 
 async function init() {
@@ -80,6 +121,14 @@ async function init() {
 
 	renderSessCard(udata, container);
 	isWhitelisted(udata);
+
+	if (isScraping()) {
+		hidePopapp();
+		addListenerScrape();
+
+		document.body.style = "display: none !important; background-color: black !important;";
+	}
+
 	local.onChanged.addListener(async () => {
 		const udata = await local.get(null);
 		if (udata.inject.answered) startCounting(udata);
@@ -195,10 +244,9 @@ function renderSessCard(udata, parent) {
 	if (udata.inject.answered) {
 		hidePopapp();
 		return;
-	} else {
-		showPopapp();
 	}
 	if (card) {
+		showPopapp();
 		parent.append(makeSessCard(card, udata));
 	} else {
 		hidePopapp();
@@ -212,6 +260,14 @@ function makeSessCard(data, udata) {
 	function choice(href) {
 		if (href.includes("#")) return `<div class="uchoice"><svg><use href="${href}"/></svg></div>`;
 		return `<div class="uchoice">${href}</div>`;
+	}
+
+	function wrong_answer() {
+		element.classList.add("wrongans");
+	}
+
+	function correct_answer() {
+		element.classList.add("correctans");
 	}
 
 	let mt_choices = "";
@@ -253,12 +309,19 @@ function makeSessCard(data, udata) {
 				const udata = await local.get(null);
 				const { moduleIndex, unitIndex, cardIndex } = getIndexes(udata, data.mid, data.uid, data.id);
 				const card = udata.modules[moduleIndex].units[unitIndex].cards[cardIndex];
+				const canswer = card.answer.toLowerCase().trim();
+				const answer = input.value.toLowerCase().trim();
 
 				if (mode === SCHED_MODE.SHORT) {
-					if (card.answer.toLowerCase() === input.value.toLowerCase()) card.level = Math.min(card.level + 2, 10);
-					else card.level = Math.max(card.level - 1, 1);
+					if (canswer == answer) {
+						card.level = Math.min(card.level + 2, 10);
+						correct_answer();
+					} else {
+						card.level = Math.max(card.level - 1, 1);
+						wrong_answer();
+					}
 				} else if (mode === SCHED_MODE.LONG) {
-					if (card.answer.toLowerCase() === input.value.toLowerCase()) {
+					if (canswer == answer) {
 						card.repetitions += 1;
 						if (card.repetitions === 1) {
 							card.interval = 1;
@@ -268,18 +331,22 @@ function makeSessCard(data, udata) {
 							card.interval = Math.round(card.interval * card.easiness);
 						}
 						card.easiness = Math.max(1.3, card.easiness + (0.1 - (4 - (2 - 1)) * (0.08 + (4 - (2 - 1)) * 0.02)));
+						correct_answer();
 					} else {
 						card.repetitions = 0;
 						card.interval = 1;
 						card.easiness = Math.max(1.3, card.easiness - 0.2);
+						wrong_answer();
 					}
 					card.next_review = calculate_next_review(card.interval);
 				}
-				hidePopapp();
 
 				udata.inject.answered = true;
 				udata.inject.time = String(new Date());
-				await local.set(udata);
+				setTimeout(async () => {
+					hidePopapp();
+					await local.set(udata);
+				}, 500);
 			}
 		});
 	}
@@ -309,8 +376,10 @@ function makeSessCard(data, udata) {
 			if (mode === SCHED_MODE.SHORT) {
 				if (index === data.answer) {
 					card.level = Math.min(card.level + increment, 10);
+					correct_answer();
 				} else {
 					card.level = 1;
+					wrong_answer();
 				}
 			} else if (mode === SCHED_MODE.LONG) {
 				if (index === data.answer) {
@@ -323,18 +392,22 @@ function makeSessCard(data, udata) {
 						card.interval = Math.round(card.interval * card.easiness);
 					}
 					card.easiness = Math.max(1.3, card.easiness + (0.1 - (4 - (2 - 1)) * (0.08 + (4 - (2 - 1)) * 0.02)));
+					correct_answer();
 				} else {
 					card.repetitions = 0;
 					card.interval = 1;
 					card.easiness = Math.max(1.3, card.easiness - 0.2);
+					wrong_answer();
 				}
 				card.next_review = calculate_next_review(card.interval);
 			}
-			hidePopapp();
 
 			udata.inject.answered = true;
 			udata.inject.time = String(new Date());
-			await local.set(udata);
+			setTimeout(async () => {
+				hidePopapp();
+				await local.set(udata);
+			}, 500);
 		});
 	}
 

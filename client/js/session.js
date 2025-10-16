@@ -1,6 +1,6 @@
-import { Q_TYPES } from "./struct.js";
+import { Q_TYPES, REASON } from "./struct.js";
 
-import { create_element, getIndexes } from "./utilities.js";
+import { create_element, getIndexes, sanitizeHTML } from "./utilities.js";
 
 const browser = window.browser || window.chrome;
 const local = browser.storage.local;
@@ -113,7 +113,7 @@ function makeSessCard(data, udata) {
 	if (data.card_type === Q_TYPES.MT) {
 		const choices = data.answers.split(",");
 		for (const i in choices) {
-			mt_choices += choice(choices[i]);
+			mt_choices += choice(sanitizeHTML(choices[i]));
 		}
 	}
 
@@ -121,13 +121,13 @@ function makeSessCard(data, udata) {
 		`
         ${mode === SCHED_MODE.SHORT ? `<p class="level">Level: ${data.level}</p>` : `<p class="level">Repetition: ${data.repetitions}</p>`}
         ${data.image ? `<div class="cimage"><img src="${data.image}"/></div>` : ""}
-        <p class="question">${data.question}</p>
-        <p class="no-display answer">${is_choice ? data.answers.split(",")[data.answer] : data.answer}</p>
+        <p class="question">${sanitizeHTML(data.question)}</p>
+        <p class="no-display answer">${is_choice ? sanitizeHTML(data.answers).split(",")[data.answer] : sanitizeHTML(data.answer)}</p>
 
         <div class="answer-container" data-answer="${data.answer}">
-            ${data.card_type === Q_TYPES.FL ? `<div class="choices" id="user-answer">${choice("#x")}${choice("#x")}${choice("#check")}${choice("#check")}</div>` : ""} 
+            ${data.card_type === Q_TYPES.FL ? `<div class="choices" id="user-answer">${choice("Don't know")}${choice("Familiar")}${choice("Correct")}${choice("Easy")}</div>` : ""} 
             ${data.card_type === Q_TYPES.TF ? `<div class="choices" id="user-answer">${choice("True")}${choice("False")}</div>` : ""} 
-            ${data.card_type === Q_TYPES.ID ? `<input type="text" id="user-answer" placeholder="Press enter to confirm answer"/>` : ""} 
+            ${data.card_type === Q_TYPES.ID ? `<input autocomplete="off" type="text" id="user-answer" placeholder="Press enter to confirm answer"/>` : ""} 
             ${data.card_type === Q_TYPES.MT ? `<div class="choices" id="user-answer">${mt_choices}</div>` : ""} 
         </div>`,
 	]);
@@ -156,9 +156,10 @@ function makeSessCard(data, udata) {
 				const udata = await local.get(null);
 				const { moduleIndex, unitIndex, cardIndex } = getIndexes(udata, data.mid, data.uid, data.id);
 				const card = udata.modules[moduleIndex].units[unitIndex].cards[cardIndex];
-
+				const canswer = card.answer.toLowerCase().trim();
+				const answer = input.value.toLowerCase().trim();
 				if (mode === SCHED_MODE.SHORT) {
-					if (card.answer.toLowerCase() === input.value.toLowerCase()) {
+					if (canswer == answer) {
 						card.level = Math.min(card.level + 2, 10);
 						correct_answer();
 					} else {
@@ -166,7 +167,7 @@ function makeSessCard(data, udata) {
 						wrong_answer();
 					}
 				} else if (mode === SCHED_MODE.LONG) {
-					if (card.answer.toLowerCase() === input.value.toLowerCase()) {
+					if (canswer == answer) {
 						card.repetitions += 1;
 						if (card.repetitions === 1) {
 							card.interval = 1;
@@ -189,6 +190,8 @@ function makeSessCard(data, udata) {
 				udata.inject.answered = true;
 				udata.inject.time = String(new Date());
 
+				udata.reason.push(REASON.CARD);
+				udata.reason.push(REASON.SCARD);
 				setTimeout(async () => await local.set(udata), 500);
 			}
 		});
@@ -247,6 +250,9 @@ function makeSessCard(data, udata) {
 
 			udata.inject.answered = true;
 			udata.inject.time = String(new Date());
+
+			udata.reason.push(REASON.CARD);
+			udata.reason.push(REASON.SCARD);
 			setTimeout(async () => await local.set(udata), 500);
 		});
 	}
@@ -299,6 +305,9 @@ function makeSessCard(data, udata) {
 
 			udata.inject.answered = true;
 			udata.inject.time = String(new Date());
+
+			udata.reason.push(REASON.CARD);
+			udata.reason.push(REASON.SCARD);
 			await local.set(udata);
 		});
 	}

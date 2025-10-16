@@ -1,3 +1,6 @@
+const browser = window.browser || window.chrome;
+const local = browser.storage.local;
+
 export function show_popup(config = {}, callback = null) {
 	document.getElementById("yvan-popup")?.remove();
 	document.getElementById("yvan-popup-style")?.remove();
@@ -8,7 +11,7 @@ export function show_popup(config = {}, callback = null) {
 	const style = document.createElement("style");
 	style.setAttribute("id", "yvan-popup-style");
 
-	const { exitable = false, block_outside = false, title = "Attention", description = "", icon = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#CCCCCC"><path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z"/></svg>', action = "Okay", choices = [], bg_color = "hsl(0, 0%, 90%)", text_color = "hsl(0, 0%, 10%)", width = 50, height = undefined } = config;
+	const { exitable = false, block_outside = true, title = "Attention", description = "", action = "Okay", choices = [], bg_color = "hsl(0, 0%, 10%)", text_color = "hsl(0, 0%, 90%)", width = 30, height = undefined, icon = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#CCCCCC"><path d="m40-120 440-760 440 760H40Zm138-80h604L480-720 178-200Zm302-40q17 0 28.5-11.5T520-280q0-17-11.5-28.5T480-320q-17 0-28.5 11.5T440-280q0 17 11.5 28.5T480-240Zm-40-120h80v-200h-80v200Zm40-100Z"/></svg>' } = config;
 
 	const choices_el = choices.map((choice, i) => `<input type="radio" name="choices" id="choice-${i}" value='${i}'/><label for="choice-${i}">${choice}</label>`).join("");
 
@@ -117,6 +120,10 @@ export function create_element(name, attr = {}, inner = []) {
 	else return element;
 }
 
+export function sanitizeHTML(str) {
+	return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 export function dateToYYYYMMDD(date, divider) {
 	divider = divider ?? "-";
 	const year = date.getFullYear();
@@ -161,4 +168,124 @@ export function getLatestId(arr) {
 	}
 	if (arr.length !== 0) id += 1;
 	return id;
+}
+
+export const POPUPS = {
+	generating: () =>
+		show_popup({
+			block_outside: true,
+			title: "Keep the window open",
+			description: "Do not unfocus the newly created window, and wait for it to disappear automatically. Ignore this message after 1 minute and still no notice.",
+			icon: '<svg><use href="#help"/></svg>',
+			action: "Click me after the window disappear",
+			width: 30,
+			bg_color: "hsla(0, 56%, 35%, 1.00)",
+			text_color: "hsl(0, 0%, 90%)",
+		}),
+	card_added: () =>
+		show_popup({
+			block_outside: true,
+			title: "Successfully added",
+			description: "Happy learning!",
+			icon: '<svg><use href="#check"/></svg>',
+			action: "Okay",
+			width: 30,
+			bg_color: "hsl(0, 0%, 10%)",
+			text_color: "hsl(0, 0%, 90%)",
+		}),
+	complete_edit: () =>
+		show_popup({
+			block_outside: true,
+			title: "Edit successfully",
+			description: "Yay!",
+			icon: '<svg><use href="#check"/></svg>',
+			action: "Thanks",
+			width: 30,
+			bg_color: "hsl(0, 0%, 10%)",
+			text_color: "hsl(0, 0%, 90%)",
+		}),
+	incomplete_input: () =>
+		show_popup({
+			block_outside: true,
+			title: "Incomplete information",
+			description: "You must complete necessary input field. Thank you and happy learning!",
+			icon: '<svg><use href="#help"/></svg>',
+			action: "Okay",
+			width: 30,
+			bg_color: "hsl(0, 0%, 10%)",
+			text_color: "hsl(0, 0%, 90%)",
+		}),
+	welcome: () =>
+		show_popup(
+			{
+				block_outside: true,
+				title: "Hi, welcome!",
+				description: "We're a bunch of BSCS students on a mission to make studying way easier (and a lot more fun)!<br><br>So what exactly is this thing we built 🤔?<br><br>Meet POP-APP — your brain's new best friend. It helps you lock in what you learn and remember it forever, right inside your browser!<br><br>Scrolling through TikTok? No problem — you can still sneak in a quick review with POP-APP.<br><br>We built this to make studying smoother, smarter, and to help you build stronger digital habits along the way.",
+				icon: '<svg><use href="#help"/></svg>',
+				action: "Hmm, how?",
+				width: 30,
+				bg_color: "hsla(103, 56%, 22%, 1.00)",
+				text_color: "hsl(0, 0%, 90%)",
+			},
+			() =>
+				show_popup(
+					{
+						block_outside: true,
+						title: "Easier than you think!",
+						description: "Hit that + button to create your own modules — think of them like subjects! For example, if you're studying English, that's your module.<br><br>Inside your English module, you can have units like Grammar, Vocabulary, or Literature. Each unit can then hold different cards — fun facts, key concepts, or bite-sized lessons that make learning stick.<br><br>These cards will pop up on your new tab page (or any tab you open) to keep your brain in gear — unless you've whitelisted a site, of course 👀.<br><br>You can choose between two smart scheduling algorithms to decide how often your cards appear — check out the Settings section for the full breakdown.<br><br>And if you don't feel like typing everything yourself, let our AI do the heavy lifting — it can automatically generate flashcards for you, turning your study notes into memory gold.",
+						icon: '<svg><use href="#check"/></svg>',
+						action: "Thanks. Never show up again.",
+						width: 30,
+						bg_color: "hsla(103, 56%, 22%, 1.00)",
+						text_color: "hsl(0, 0%, 90%)",
+					},
+					async () => {
+						const udata = await local.get(null);
+						udata.settings.rules.shown_tips_new = true;
+						await local.set(udata);
+					}
+				)
+		),
+};
+
+export function tooltipInit() {
+	const innerWidth = window.innerWidth;
+	const innerHeight = window.innerHeight;
+
+	let tooltips = [];
+	document.addEventListener("mouseover", ({ target }) => {
+		if (target.dataset?.tooltip) {
+			console.log(1);
+			for (let i = 0; i < tooltips.length; i++) {
+				tooltips[i].remove();
+			}
+
+			const { x, y, height: target_height } = target.getBoundingClientRect();
+			const tooltip = create_element("div", { class: "tooltip" }, [target.dataset.tooltip]);
+			tooltips.push(tooltip);
+			document.body.appendChild(tooltip);
+
+			const { width: tooltip_width, height: tooltip_height } = tooltip.getBoundingClientRect();
+			const offset_height = y + target_height + 5;
+			tooltip.style.top = (offset_height + tooltip_height > innerHeight ? y - tooltip_height : offset_height) + "px";
+			tooltip.style.left = (x + tooltip_width > innerWidth ? innerWidth - tooltip_width : x) + "px";
+		}
+	});
+}
+
+export function encode_b64(str) {
+	const bytes = new TextEncoder().encode(str);
+	const base64 = btoa(
+		Array.from(bytes)
+			.map((byte) => String.fromCharCode(byte))
+			.join("")
+	);
+	return base64;
+}
+
+export function decode_b64(b64) {
+	const binary = atob(b64);
+	const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+	const str = new TextDecoder().decode(bytes);
+	return str;
 }

@@ -1,9 +1,10 @@
 import { addListenerParse } from "./parse.js";
 import { renderSessCard } from "./session.js";
-import { addListenerSetting, updateUISetting } from "./settings.js";
+import { addListenerSetting, msToMin, updateUISetting } from "./settings.js";
 import { getElements } from "./elements.js";
 import { getStruct, Q_TYPES, NAVIGATION, REASON } from "./struct.js";
-import { show_popup, create_element, dateToYYYYMMDD, getIndexes, toBase64, getLatestId } from "./utilities.js";
+import { POPUPS, encode_b64, create_element, dateToYYYYMMDD, getIndexes, toBase64, getLatestId, tooltipInit, sanitizeHTML, show_popup } from "./utilities.js";
+import { addListenerGenerate } from "./generate.js";
 
 const browser = window.browser || window.chrome;
 const local = browser.storage.local;
@@ -16,76 +17,75 @@ let currnav = NAVIGATION.MODULES;
 let currmodid = null;
 let currunitid = null;
 
-const POPUPS = {
-	card_added: () =>
-		show_popup({
-			block_outside: true,
-			title: "Successfully added",
-			description: "Happy learning!",
-			icon: '<svg><use href="#check"/></svg>',
-			action: "Okay",
-			width: 30,
-			bg_color: "hsl(0, 0%, 10%)",
-			text_color: "hsl(0, 0%, 90%)",
-		}),
-	complete_edit: () =>
-		show_popup({
-			block_outside: true,
-			title: "Edit successfully",
-			description: "Yay!",
-			icon: '<svg><use href="#check"/></svg>',
-			action: "Thanks",
-			width: 30,
-			bg_color: "hsl(0, 0%, 10%)",
-			text_color: "hsl(0, 0%, 90%)",
-		}),
-	incomplete_input: () =>
-		show_popup({
-			block_outside: true,
-			title: "Incomplete information",
-			description: "You must complete necessary input field. Thank you and happy learning!",
-			icon: '<svg><use href="#help"/></svg>',
-			action: "Okay",
-			width: 30,
-			bg_color: "hsl(0, 0%, 10%)",
-			text_color: "hsl(0, 0%, 90%)",
-		}),
-	welcome: () =>
-		show_popup(
-			{
-				block_outside: true,
-				title: "Hi, welcome!",
-				description: "We're a bunch of BSCS students on a mission to make studying way easier (and a lot more fun)!<br><br>So what exactly is this thing we built 🤔?<br><br>Meet POP-APP — your brain's new best friend. It helps you lock in what you learn and remember it forever, right inside your browser!<br><br>Scrolling through TikTok? No problem — you can still sneak in a quick review with POP-APP.<br><br>We built this to make studying smoother, smarter, and to help you build stronger digital habits along the way.",
-				icon: '<svg><use href="#help"/></svg>',
-				action: "Hmm, how?",
-				width: 30,
-				bg_color: "hsla(0, 56%, 22%, 1.00)",
-				text_color: "hsl(0, 0%, 90%)",
-			},
-			() =>
-				show_popup(
-					{
-						block_outside: true,
-						title: "Easier than you think!",
-						description: "Hit that + button to create your own modules — think of them like subjects! For example, if you're studying English, that's your module.<br><br>Inside your English module, you can have units like Grammar, Vocabulary, or Literature. Each unit can then hold different cards — fun facts, key concepts, or bite-sized lessons that make learning stick.<br><br>These cards will pop up on your new tab page (or any tab you open) to keep your brain in gear — unless you've whitelisted a site, of course 👀.<br><br>You can choose between two smart scheduling algorithms to decide how often your cards appear — check out the Settings section for the full breakdown.<br><br>And if you don't feel like typing everything yourself, let our AI do the heavy lifting — it can automatically generate flashcards for you, turning your study notes into memory gold.",
-						icon: '<svg><use href="#check"/></svg>',
-						action: "Thanks. Never show up again.",
-						width: 30,
-						bg_color: "hsla(0, 56%, 22%, 1.00)",
-						text_color: "hsl(0, 0%, 90%)",
-					},
-					async () => {
-						const udata = await local.get(null);
-						udata.settings.rules.shown_tips_new = true;
-						await local.set(udata);
-					}
-				)
-		),
-};
-
 init();
 
+async function init() {
+	await initStorage();
+	addListenerSettingSide();
+	addListenerLibrary();
+	addListenerSetting();
+	addListenerParse();
+	addListenerGenerate();
+	tooltipInit();
+
+	const udata = await local.get(null);
+	const { getLibraryElements, getSessionBody } = getElements();
+	const { SCARDC } = getSessionBody();
+
+	const { CONTENT } = getLibraryElements();
+
+	if (udata.inject.answered) {
+		startCounting(udata);
+	}
+	// We render modules by default
+	renderModules(udata, CONTENT);
+	renderSessCard(udata, SCARDC);
+	updateUISetting(udata);
+
+	if (udata.settings.rules.shown_tips_new === false) POPUPS.welcome();
+
+	local.onChanged.addListener(async () => {
+		const udata = await local.get(null);
+		const reason = new Set(udata.reason);
+
+		if (reason.has(REASON.SCARD)) {
+			console.log("render sc");
+			renderSessCard(udata, SCARDC);
+		}
+
+		if (udata.inject.answered) {
+			startCounting(udata);
+		}
+
+		if (reason.has(REASON.SETTING)) {
+			updateUISetting(udata);
+		}
+
+		if (currnav === NAVIGATION.MODULES && reason.has(REASON.MODULE)) {
+			console.log("render m");
+			renderModules(udata, CONTENT);
+		}
+
+		if (currnav === NAVIGATION.UNITS && reason.has(REASON.UNIT)) {
+			console.log("render u");
+			const { moduleIndex } = getIndexes(udata, currmodid);
+			renderUnits(udata, moduleIndex, CONTENT);
+		}
+
+		if (currnav === NAVIGATION.CARDS && reason.has(REASON.CARD)) {
+			if (currmodid != null || currunitid != null) {
+				console.log("render c");
+				const { moduleIndex, unitIndex } = getIndexes(udata, currmodid, currunitid);
+				renderCards(udata, moduleIndex, unitIndex, CONTENT);
+			}
+		}
+
+		await local.set({ reason: [] });
+	});
+}
+
 function startCounting(udata) {
+	const { COUNTDOWN } = getElements().getSessionBody();
 	const time = new Date(udata.inject.time);
 	const interval_ms = new Date(udata.settings.rules.interval_ms);
 
@@ -93,11 +93,14 @@ function startCounting(udata) {
 
 	INTERVALS.timer = setInterval(async () => {
 		const elapsed_time = new Date() - time;
-		console.log(elapsed_time);
+		const remaining_time = msToMin(interval_ms - elapsed_time);
+		const display_time = remaining_time < 0 ? 0 : remaining_time;
+		if (COUNTDOWN) COUNTDOWN.innerText = `Next card: ${display_time < 1 ? (display_time * 60).toFixed(0) + "s" : remaining_time.toFixed(0) + "m"}`;
 		if (elapsed_time >= interval_ms) {
 			const nudata = await local.get(null);
 			nudata.inject.answered = false;
 
+			nudata.reason.push(REASON.SCARD);
 			await local.set(nudata);
 			clearInterval(INTERVALS.timer);
 		}
@@ -144,62 +147,6 @@ function renderChoices(CCHO, CORC) {
 	CORC.append(parent);
 }
 
-async function init() {
-	await initStorage();
-	addListenerSettingSide();
-	addListenerLibrary();
-	addListenerSetting();
-	addListenerParse();
-
-	const udata = await local.get(null);
-	const { getLibraryElements, getSessionBody } = getElements();
-	const { SCARDC } = getSessionBody();
-
-	const { CONTENT } = getLibraryElements();
-
-	if (udata.inject.answered) {
-		startCounting(udata);
-	}
-	// We render modules by default
-	renderModules(udata, CONTENT);
-	renderSessCard(udata, SCARDC);
-	updateUISetting(udata);
-
-	if (udata.settings.rules.shown_tips_new === false) POPUPS.welcome();
-
-	local.onChanged.addListener(async () => {
-		const udata = await local.get(null);
-		if (udata.reason.length > 0) console.log(udata);
-		const reason = new Set(udata.reason);
-
-		if (udata.inject.answered) {
-			startCounting(udata);
-		}
-
-		updateUISetting(udata);
-		renderSessCard(udata, SCARDC);
-
-		if (reason.has(REASON.MODULE)) {
-			renderModules(udata, CONTENT);
-			renderSessCard(udata, SCARDC);
-		}
-
-		if (reason.has(REASON.UNIT)) {
-			const { moduleIndex } = getIndexes(udata, currmodid);
-			renderUnits(udata, moduleIndex, CONTENT);
-			renderSessCard(udata, SCARDC);
-		}
-
-		if (reason.has(REASON.CARD)) {
-			const { moduleIndex, unitIndex } = getIndexes(udata, currmodid, currunitid);
-			renderCards(udata, moduleIndex, unitIndex, CONTENT);
-			renderSessCard(udata, SCARDC);
-		}
-
-		await local.set({ reason: [] });
-	});
-}
-
 async function initStorage() {
 	const udata = await local.get(null);
 	console.log(udata);
@@ -222,9 +169,9 @@ async function initStorage() {
 
 function addListenerLibrary() {
 	const { getLibraryElements, getModulePopup, getUnitPopup, getCardPopup } = getElements();
-	const { CONTENT, MADD, MSORT, NBACK, UADD, USORT, CADD, CSORT, CACT, MACT, UACT } = getLibraryElements();
+	const { CONTENT, MADD, MSORT, NBACK, UADD, USORT, CADD, CSORT, CACT, MACT, UACT, MIMP } = getLibraryElements();
 
-	const { MCONT, MCONF, MCONFEDIT, MCANC, MAUTH, MDESC, MTITLE, MICON } = getModulePopup();
+	const { MCONT, MCONF, MCONFEDIT, MCANC, MAUTH, MDESC, MTITLE, MICON, MCONFILE, MFILE } = getModulePopup();
 	const { UCONT, UCONF, UCONFEDIT, UCANC, UDESC, UICON, UTITLE } = getUnitPopup();
 	const { CCONT, CCONF, CCONFEDIT, CCANC, CANS, CCHO, CQUE, CORC, QTYPE, CANSC, CCHOC, CIMG, CCORC } = getCardPopup();
 
@@ -279,9 +226,9 @@ function addListenerLibrary() {
 		module.description = description;
 		module.icon = icon;
 
-		udata.reason.push(REASON.MODULE);
-
 		POPUPS.complete_edit();
+
+		udata.reason.push(REASON.MODULE);
 		await local.set(udata);
 		mAddExit();
 	});
@@ -308,7 +255,6 @@ function addListenerLibrary() {
 
 		udata.modules.push(MODULE);
 		udata.reason.push(REASON.MODULE);
-
 		await local.set(udata);
 		mAddExit();
 	});
@@ -336,7 +282,6 @@ function addListenerLibrary() {
 
 		udata.modules[moduleIndex].units.push(UNIT);
 		udata.reason.push(REASON.UNIT);
-
 		await local.set(udata);
 		uAddExit();
 	});
@@ -360,9 +305,9 @@ function addListenerLibrary() {
 		unit.description = description;
 		unit.icon = icon;
 
-		udata.reason.push(REASON.UNIT);
-
 		POPUPS.complete_edit();
+
+		udata.reason.push(REASON.UNIT);
 		await local.set(udata);
 		uAddExit();
 	});
@@ -439,6 +384,10 @@ function addListenerLibrary() {
 					POPUPS.incomplete_input();
 					return;
 				}
+				if (answers.length === 1) {
+					show_popup({ title: "Lack of choices", description: "Choices must be greater than one" });
+					return;
+				}
 
 				CARD.question = question;
 				CARD.answer = answer;
@@ -447,8 +396,10 @@ function addListenerLibrary() {
 				break;
 			}
 		}
-		udata.modules[moduleIndex].units[unitIndex].cards.push(CARD);
 		POPUPS.card_added();
+
+		udata.modules[moduleIndex].units[unitIndex].cards.push(CARD);
+		udata.reason.push(REASON.SCARD);
 		udata.reason.push(REASON.CARD);
 		await local.set(udata);
 	});
@@ -532,6 +483,7 @@ function addListenerLibrary() {
 
 		POPUPS.complete_edit();
 		udata.reason.push(REASON.CARD);
+		udata.reason.push(REASON.SCARD);
 		await local.set(udata);
 	});
 
@@ -602,29 +554,43 @@ function addListenerLibrary() {
 		}
 	});
 
+	MIMP.addEventListener("click", async () => {
+		const title = MCONT.querySelector(".title");
+		title.textContent = "Import Module";
+
+		MCONF.classList.add("no-display");
+		MCONFEDIT.classList.add("no-display");
+
+		MFILE.classList.remove("no-display");
+		MCONFILE.classList.remove("no-display");
+		MCONT.classList.remove("no-display");
+	});
+
 	MADD.addEventListener("click", () => {
-		const mconf = MCONT.querySelector("#mconf");
-		const mconfedit = MCONT.querySelector("#mconfedit");
 		const title = MCONT.querySelector(".title");
 		title.textContent = "Add New Module";
-		mconf.classList.remove("no-display");
-		mconfedit.classList.add("no-display");
+
+		MCONFEDIT.classList.add("no-display");
+		MCONFILE.classList.add("no-display");
+		MFILE.classList.add("no-display");
+
+		MCONF.classList.remove("no-display");
 		MCONT.classList.remove("no-display");
 	});
 
 	UADD.addEventListener("click", () => {
-		const uconf = UCONT.querySelector("#uconf");
-		const uconfedit = UCONT.querySelector("#uconfedit");
 		const title = UCONT.querySelector(".title");
 		title.textContent = "Add New Unit";
-		uconf.classList.remove("no-display");
-		uconfedit.classList.add("no-display");
+
+		UCONF.classList.remove("no-display");
+		UCONFEDIT.classList.add("no-display");
 		UCONT.classList.remove("no-display");
 	});
 
 	CADD.addEventListener("click", () => {
 		const title = CCONT.querySelector(".title");
 		title.textContent = "Add New Card";
+
 		CCONF.classList.remove("no-display");
 		CCONFEDIT.classList.add("no-display");
 		CCONT.classList.remove("no-display");
@@ -681,25 +647,25 @@ function makeCard(data) {
 	const element = create_element("div", { class: `module card`, dataset: { id: data.id } }, [
 		`
 	<div class="settings">
-		<button data-feature="edit">
+		<button data-feature="edit" data-tooltip="Edit">
 			<svg><use href="#edit" /></svg>
 		</button>
-		<button data-feature="delete">
+		<button data-feature="delete" data-tooltip="Delete immediately">
 			<svg><use href="#delete" /></svg>
 		</button>
 	</div>
 	<div class="information">
 		<div class="question">
 			<p>Question: </p>
-			<p class="card_question">${data.question}</p>
+			<p class="card_question">${sanitizeHTML(data.question)}</p>
 		</div>
 		<div class="answers ${is_choices ? "" : "no-display"}">
 			<p>Choices: </p>
-			<p class="card_question">${is_choices ? data.answers.replaceAll(/,/g, "&nbsp , &nbsp") : ""}</p>
+			<p class="card_question">${is_choices ? sanitizeHTML(data.answers).replaceAll(/,/g, "&nbsp , &nbsp") : ""}</p>
 		</div>
 		<div class="answer">
 			<p>Answer: </p>
-			<p class="card_question">${is_choices ? data.answers.split(",")[data.answer] : data.answer}</p>
+			<p class="card_question">${is_choices ? sanitizeHTML(data.answers.split(",")[data.answer]) : sanitizeHTML(data.answer)}</p>
 		</div>
 		<span class="hline hspacetop"></span>
 		<div class="meta">
@@ -741,7 +707,9 @@ function makeCard(data) {
 			case "delete": {
 				const { moduleIndex, unitIndex, cardIndex } = getIndexes(udata, currmodid, currunitid, data.id);
 				udata.modules[moduleIndex].units[unitIndex].cards.splice(cardIndex, 1);
+
 				udata.reason.push(REASON.CARD);
+				udata.reason.push(REASON.SCARD);
 				await local.set(udata);
 				break;
 			}
@@ -764,21 +732,21 @@ function makeUnit(data) {
 	const element = create_element("div", { class: `module ${!data.is_active ? "inactive" : ""}`, dataset: { id: data.id } }, [
 		`
 	<div class="settings">
-		<button data-feature="edit">
+		<button data-feature="edit" data-tooltip="Edit">
 			<svg><use href="#edit" /></svg>
 		</button>
-		<button data-feature="delete">
+		<button data-feature="delete" data-tooltip="Delete immediately">
 			<svg><use href="#delete" /></svg>
 		</button>
-		<button data-feature="togglestate">
+		<button data-feature="togglestate" data-tooltip="Enable/disable">
 			<svg><use href="#togglestate" /></svg>
 		</button>
 	</div>
 	<div class="information">
 		<div class="header">
-			<p class="title">${data.title}</p>
+			<p class="title">${sanitizeHTML(data.title)}</p>
 			<span class="hspacetop"></span>
-			<p class="description">${data.description}</p>
+			<p class="description">${sanitizeHTML(data.description)}</p>
 		</div>
 		<div class="meta">
 			<!-- This should be an image -->
@@ -832,6 +800,7 @@ function makeUnit(data) {
 				const { moduleIndex, unitIndex } = getIndexes(udata, currmodid, data.id);
 				udata.modules[moduleIndex].units.splice(unitIndex, 1);
 				udata.reason.push(REASON.UNIT);
+				udata.reason.push(REASON.SCARD);
 				await local.set(udata);
 				break;
 			}
@@ -839,6 +808,7 @@ function makeUnit(data) {
 				const { moduleIndex, unitIndex } = getIndexes(udata, currmodid, data.id);
 				udata.modules[moduleIndex].units[unitIndex].is_active = !udata.modules[moduleIndex].units[unitIndex].is_active;
 				udata.reason.push(REASON.UNIT);
+				udata.reason.push(REASON.SCARD);
 				await local.set(udata);
 				break;
 			}
@@ -861,21 +831,24 @@ function makeModule(data) {
 	const element = create_element("div", { class: `module ${!data.is_active ? "inactive" : ""}`, dataset: { id: data.id } }, [
 		`
 	<div class="settings">
-		<button data-feature="edit">
+		<button data-feature="export" data-tooltip="Export module">
+			<svg><use href="#export" /></svg>
+		</button>
+		<button data-feature="edit" data-tooltip="Edit">
 			<svg><use href="#edit" /></svg>
 		</button>
-		<button data-feature="delete">
+		<button data-feature="delete" data-tooltip="Delete immediately">
 			<svg><use href="#delete" /></svg>
 		</button>
-		<button data-feature="togglestate">
+		<button data-feature="togglestate" data-tooltip="Enable/disable">
 			<svg><use href="#togglestate" /></svg>
 		</button>
 	</div>
 	<div class="information">
 		<div class="header">
-			<p class="title">${data.title}</p>
+			<p class="title">${sanitizeHTML(data.title)}</p>
 			<span class="hspacetop"></span>
-			<p class="description">${data.description}</p>
+			<p class="description">${sanitizeHTML(data.description)}</p>
 		</div>
 		<div class="meta">
 			<!-- This should be an image -->
@@ -911,10 +884,25 @@ function makeModule(data) {
 
 		const udata = await local.get(null);
 		switch (button.dataset.feature) {
+			case "export": {
+				const udata = await local.get(null);
+				const { moduleIndex } = getIndexes(udata, data.id);
+				const module = udata.modules[moduleIndex];
+
+				const filename = module.title + ".muni";
+				const blob = new Blob([encode_b64(JSON.stringify(module))], { type: "text/plain" });
+				const url = URL.createObjectURL(blob);
+
+				const download = create_element("a", { href: url, download: filename });
+				document.body.appendChild(download);
+				download.click();
+				download.remove();
+
+				URL.revokeObjectURL(url);
+				break;
+			}
 			case "edit": {
-				const { MCONT, MAUTH, MDESC, MTITLE, MICON } = getElements().getModulePopup();
-				const mconf = MCONT.querySelector("#mconf");
-				const mconfedit = MCONT.querySelector("#mconfedit");
+				const { MCONT, MAUTH, MDESC, MTITLE, MICON, MCONFILE, MFILE, MCONF, MCONFEDIT } = getElements().getModulePopup();
 				const title = MCONT.querySelector(".title");
 
 				MICON.value = data.icon;
@@ -923,8 +911,10 @@ function makeModule(data) {
 				MAUTH.value = data.author;
 
 				title.textContent = "Edit Module";
-				mconf.classList.add("no-display");
-				mconfedit.classList.remove("no-display");
+				MCONF.classList.add("no-display");
+				MCONFILE.classList.add("no-display");
+				MFILE.classList.add("no-display");
+				MCONFEDIT.classList.remove("no-display");
 				MCONT.dataset.mid = data.id;
 				MCONT.classList.remove("no-display");
 				break;
@@ -933,6 +923,7 @@ function makeModule(data) {
 				const { moduleIndex } = getIndexes(udata, data.id);
 				udata.modules.splice(moduleIndex, 1);
 				udata.reason.push(REASON.MODULE);
+				udata.reason.push(REASON.SCARD);
 				await local.set(udata);
 				break;
 			}
@@ -940,6 +931,7 @@ function makeModule(data) {
 				const { moduleIndex } = getIndexes(udata, data.id);
 				udata.modules[moduleIndex].is_active = !udata.modules[moduleIndex].is_active;
 				udata.reason.push(REASON.MODULE);
+				udata.reason.push(REASON.SCARD);
 				await local.set(udata);
 				break;
 			}

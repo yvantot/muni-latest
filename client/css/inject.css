@@ -155,3 +155,35 @@
 .no-display {
 	display: none;
 }
+.correctans {
+	background-color: var(--green) !important;
+	* {
+		color: var(--drkgray) !important;
+		border: none !important;
+	}
+	*:hover {
+		background-color: var(--green) !important;
+		border: none !important;
+	}
+	.choices,
+	.level,
+	input {
+		visibility: hidden !important;
+	}
+}
+.wrongans {
+	background-color: var(--red) !important;
+	* {
+		color: var(--drkgray) !important;
+		border: none !important;
+	}
+	*:hover {
+		background-color: var(--red) !important;
+		border: none !important;
+	}
+	.choices,
+	.level,
+	input {
+		visibility: hidden !important;
+	}
+}
