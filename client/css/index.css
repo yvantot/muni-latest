@@ -498,6 +498,25 @@ main {
 		font-size: 0.8rem;
 	}
 
+	.ques {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		align-items: center;
+		p {
+			display: inline;
+			font-size: 0.8rem;
+		}
+		input {
+			font-size: 0.8rem;
+			grid-column-start: 2;
+			grid-column-end: 5;
+			width: 100%;
+			padding: 0.3rem;
+			border-radius: 0.5rem;
+			border: 1px solid var(--ogray);
+		}
+	}
+
 	.information {
 		display: flex;
 		flex-direction: column;

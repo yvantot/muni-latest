@@ -3,7 +3,7 @@ import { renderSessCard } from "./session.js";
 import { addListenerSetting, msToMin, updateUISetting } from "./settings.js";
 import { getElements } from "./elements.js";
 import { getStruct, Q_TYPES, NAVIGATION, REASON } from "./struct.js";
-import { POPUPS, encode_b64, create_element, dateToYYYYMMDD, getIndexes, toBase64, getLatestId, tooltipInit, sanitizeHTML, show_popup } from "./utilities.js";
+import { POPUPS, encode_b64, create_element, dateToYYYYMMDD, getIndexes, toBase64, getLatestId, tooltipInit, sanitizeHTML, show_popup, decode_b64 } from "./utilities.js";
 import { addListenerGenerate } from "./generate.js";
 
 const browser = window.browser || window.chrome;
@@ -171,7 +171,7 @@ function addListenerLibrary() {
 	const { getLibraryElements, getModulePopup, getUnitPopup, getCardPopup } = getElements();
 	const { CONTENT, MADD, MSORT, NBACK, UADD, USORT, CADD, CSORT, CACT, MACT, UACT, MIMP } = getLibraryElements();
 
-	const { MCONT, MCONF, MCONFEDIT, MCANC, MAUTH, MDESC, MTITLE, MICON, MCONFILE, MFILE } = getModulePopup();
+	const { MCONT, MCONF, MCONFEDIT, MCANC, MAUTH, MDESC, MTITLE, MICON, MCONFILE, MFILE, MFILEINP } = getModulePopup();
 	const { UCONT, UCONF, UCONFEDIT, UCANC, UDESC, UICON, UTITLE } = getUnitPopup();
 	const { CCONT, CCONF, CCONFEDIT, CCANC, CANS, CCHO, CQUE, CORC, QTYPE, CANSC, CCHOC, CIMG, CCORC } = getCardPopup();
 
@@ -231,6 +231,32 @@ function addListenerLibrary() {
 		udata.reason.push(REASON.MODULE);
 		await local.set(udata);
 		mAddExit();
+	});
+
+	MCONFILE.addEventListener("click", async () => {
+		const udata = await local.get(null);
+		const files = MFILEINP.files;
+
+		if (files.length > 0) {
+			for (const i of files) {
+				const reader = new FileReader();
+				reader.readAsText(i);
+
+				reader.onload = async () => {
+					const module = JSON.parse(decode_b64(reader.result));
+					module.id = getLatestId(udata.modules);
+					udata.modules.push(module);
+					POPUPS.card_added();
+					MFILEINP.value = "";
+
+					udata.reason.push(REASON.MODULE);
+					udata.reason.push(REASON.UNIT);
+					udata.reason.push(REASON.CARD);
+					udata.reason.push(REASON.SCARD);
+					await local.set(udata);
+				};
+			}
+		}
 	});
 
 	MCONF.addEventListener("click", async () => {
@@ -558,6 +584,8 @@ function addListenerLibrary() {
 		const title = MCONT.querySelector(".title");
 		title.textContent = "Import Module";
 
+		MCONT.querySelector(".information").classList.add("no-display");
+
 		MCONF.classList.add("no-display");
 		MCONFEDIT.classList.add("no-display");
 
@@ -569,6 +597,8 @@ function addListenerLibrary() {
 	MADD.addEventListener("click", () => {
 		const title = MCONT.querySelector(".title");
 		title.textContent = "Add New Module";
+
+		MCONT.querySelector(".information").classList.remove("no-display");
 
 		MCONFEDIT.classList.add("no-display");
 		MCONFILE.classList.add("no-display");
@@ -911,6 +941,7 @@ function makeModule(data) {
 				MAUTH.value = data.author;
 
 				title.textContent = "Edit Module";
+				MCONT.querySelector(".information").classList.remove("no-display");
 				MCONF.classList.add("no-display");
 				MCONFILE.classList.add("no-display");
 				MFILE.classList.add("no-display");

@@ -62,7 +62,10 @@ async function scrapeChatGPT(prompt) {
 							POPUPS.card_added();
 
 							udata.modules.push(module);
+
 							udata.reason.push(REASON.MODULE);
+							udata.reason.push(REASON.UNIT);
+							udata.reason.push(REASON.CARD);
 							udata.reason.push(REASON.SCARD);
 							await local.set(udata);
 						}),
