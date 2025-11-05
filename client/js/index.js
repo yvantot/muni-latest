@@ -203,7 +203,6 @@ function addListenerLibrary() {
 	};
 
 	// MODULES
-
 	MCONFEDIT.addEventListener("click", async () => {
 		const author = MAUTH.value;
 		const description = MDESC.value;
@@ -248,14 +247,18 @@ function addListenerLibrary() {
 					udata.modules.push(module);
 					POPUPS.card_added();
 					MFILEINP.value = "";
+					MCONT.classList.add("no-display");
 
 					udata.reason.push(REASON.MODULE);
 					udata.reason.push(REASON.UNIT);
 					udata.reason.push(REASON.CARD);
 					udata.reason.push(REASON.SCARD);
+
 					await local.set(udata);
 				};
 			}
+		} else {
+			POPUPS.incomplete_input();
 		}
 	});
 

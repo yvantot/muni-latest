@@ -79,9 +79,9 @@ export function getElements() {
 				MCANC: document.getElementById("mcanc"),
 				MTITLE: document.getElementById("mtitle"),
 				MDESC: document.getElementById("mdesc"),
-				MCONFILE: document.getElementById("mconfile"), // Button
-				MFILEINP: document.getElementById("mfileinp"), // Input
-				MFILE: document.getElementById("mfile"), // Container
+				MCONFILE: document.getElementById("mconfile"),
+				MFILEINP: document.getElementById("mfileinp"),
+				MFILE: document.getElementById("mfile"),
 				MAUTH: document.getElementById("mauth"),
 				MICON: document.getElementById("micon"),
 			};

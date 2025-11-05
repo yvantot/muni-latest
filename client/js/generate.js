@@ -28,7 +28,6 @@ export function addListenerGenerate() {
 		POPUPS.generating();
 
 		const prompt = buildPrompt(uprompt, ucount, ccount, types);
-		console.log(prompt);
 
 		if (GPTSOURCE.checked) {
 			response = await scrapeChatGPT(prompt);
